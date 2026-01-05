@@ -1,4 +1,4 @@
-dbsales_hv26:
+datawarehouse:
   outputs:
     dev:
       dbname: '{{ env_var(''DB_NAME_PROD'') }}'
@@ -11,3 +11,4 @@ dbsales_hv26:
       type: postgres
       user: '{{ env_var(''DB_USER_PROD'') }}'
   target: dev
+

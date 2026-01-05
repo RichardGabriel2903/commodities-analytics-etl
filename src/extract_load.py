@@ -19,10 +19,20 @@ DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 engine= create_engine(DATABASE_URL)
 
-def buscar_dados_commodities(simbolo, periodo='5d', intervalo='1d'):
+def buscar_dados_commodities(simbolo, start='2024-06-01', end='2024-06-30'):
     ticker = yf.Ticker(simbolo)
-    dados = ticker.history(period=periodo, interval=intervalo)[['Close']]
+
+    dados = ticker.history(
+        start=start,
+        end=end,
+        interval='1d'
+    )[['Close']]
+
+    dados = dados.reset_index()  # Date vira coluna
+    dados.rename(columns={'Date': 'Date', 'Close': 'Close'}, inplace=True)
+
     dados['simbolo'] = simbolo
+
     return dados
 
 def buscar_todos_dados_commodities(commodities):
@@ -33,7 +43,13 @@ def buscar_todos_dados_commodities(commodities):
     return pd.concat(todos_dados)
 
 def salvar_no_db(df, schema='public'):
-    df.to_sql('commodities', engine, if_exists='replace', index=True, index_label='Date', schema=schema)
+    df.to_sql(
+        'commodities',
+        engine,
+        if_exists='replace',
+        index=False, 
+        schema=schema
+    )
     
 if __name__ == "__main__":
     dados_concatenados = buscar_todos_dados_commodities(commodities)
